@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本計程車日語學習工具</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1F3A5F;
+    --navy-deep: #152A47;
+    --steel: #5C7290;
+    --bg: #F4F5F7;
+    --card: #FFFFFF;
+    --card-alt: #E9EBEF;
+    --line: #DCDFE4;
+    --ink: #24282E;
+    --ink-soft: #6B7280;
+    --muted: #9CA3AF;
+    --accent: #1F3A5F;
+    --accent-soft: #DCE3EC;
+    --on-accent: #F4F5F7;
+    --r-sm: 10px;
+    --r-md: 16px;
+    --r-lg: 22px;
+    --r-pill: 999px;
+  }
+
+  html[data-theme="dark"] {
+    --bg: #1C1B1A;
+    --card: #262423;
+    --card-alt: #302E2C;
+    --line: #3F3D3A;
+    --ink: #D9D5D0;
+    --ink-soft: #A8A39C;
+    --muted: #7A766F;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans TC", "Noto Serif JP", serif;
+    min-height: 100vh;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+
+  .topbar {
+    background: var(--navy);
+    color: var(--on-accent);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar-left { display: flex; align-items: baseline; gap: 10px; }
+  .topbar-title { font-size: 16px; font-weight: 700; letter-spacing: 0.04em; }
+  .topbar-sub { font-size: 12px; color: rgba(244,245,247,0.65); letter-spacing: 0.02em; }
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+
+  .theme-toggle {
+    width: 36px; height: 36px;
+    border-radius: var(--r-pill);
+    border: 1px solid rgba(244,245,247,0.25);
+    background: rgba(244,245,247,0.08);
+    color: #F4F5F7;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .theme-toggle:hover { background: rgba(244,245,247,0.16); border-color: rgba(244,245,247,0.4); }
+  .theme-toggle svg { width: 17px; height: 17px; }
+
+  .tabbar {
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    overflow-x: auto;
+  }
+  .tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 16px 10px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    user-select: none;
+  }
+  .tab-item:hover { color: var(--ink); }
+  .tab-item.active { color: var(--ink); font-weight: 700; border-bottom-color: var(--navy); }
+
+  .subtabbar {
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    overflow-x: auto;
+  }
+  .subtab-item {
+    padding: 11px 16px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    user-select: none;
+  }
+  .subtab-item:hover { color: var(--ink); }
+  .subtab-item.active { color: var(--navy); font-weight: 700; border-bottom-color: var(--navy); }
+
+  .inner-tabbar {
+    display: inline-flex;
+    gap: 4px;
+    background: var(--card-alt);
+    border-radius: var(--r-pill);
+    padding: 4px;
+    margin-bottom: 22px;
+  }
+  .inner-tab-item {
+    padding: 8px 20px;
+    border-radius: var(--r-pill);
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .inner-tab-item:hover { color: var(--ink); }
+  .inner-tab-item.active { background: var(--navy); color: var(--on-accent); font-weight: 700; }
+
+  .inner-view { display: none; }
+  .inner-view.active { display: block; }
+
+  .main { max-width: 1180px; margin: 0 auto; padding: 22px 24px 80px; }
+  .section-label { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ====== STUDY ====== */
+  .study-layout { max-width: 560px; margin: 0 auto; }
+  .card-panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 48px 40px;
+    min-height: 280px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+  }
+  .card-index-tag { position: absolute; top: 20px; left: 22px; font-size: 12px; color: var(--muted); }
+  .card-jp { font-size: 32px; font-weight: 700; color: var(--ink); margin-bottom: 10px; line-height: 1.3; }
+  .card-kana { font-size: 15px; color: var(--ink-soft); margin-bottom: 18px; }
+  .card-zh { font-size: 24px; font-weight: 700; color: var(--navy); min-height: 30px; }
+  .card-hint { margin-top: 22px; font-size: 12px; color: var(--muted); }
+  .card-nav-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 18px; }
+  .nav-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink-soft);
+    width: 38px; height: 38px; border-radius: var(--r-pill); cursor: pointer; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-btn:hover { border-color: var(--navy); color: var(--navy); }
+  .nav-counter { font-size: 13px; color: var(--muted); min-width: 56px; text-align: center; }
+  .shuffle-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink-soft);
+    padding: 0 18px; height: 38px; border-radius: var(--r-pill); cursor: pointer;
+    font-size: 13px; font-family: inherit;
+  }
+  .shuffle-btn:hover { border-color: var(--navy); color: var(--navy); }
+
+  /* ====== REF ====== */
+  .ref-toolbar-row {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px; margin-bottom: 14px;
+  }
+  .ref-toolbar-row .section-label { margin-bottom: 0; }
+  .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ref-cell {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 16px 20px; min-height: 56px; font-size: 15px; color: var(--ink);
+    cursor: pointer; text-align: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .ref-cell:hover { border-color: var(--navy); }
+  .ref-cell-jp { font-weight: 700; }
+  .ref-cell.revealed { background: var(--card-alt); border-color: var(--navy); }
+  .ref-cell-kana { font-size: 13px; color: var(--ink-soft); }
+  .ref-cell-zh { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .ref-grid.zh-pinned .ref-cell { cursor: default; }
+  .ref-grid.zh-pinned .ref-cell:hover { border-color: var(--line); }
+
+  /* ====== QUIZ ====== */
+  .quiz-wrap { max-width: 560px; margin: 0 auto; }
+  .study-toolbar-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 14px; margin-bottom: 22px; flex-wrap: wrap;
+  }
+  .study-toolbar-row .inner-tabbar { margin-bottom: 0; }
+  .direction-toggle-btn {
+    padding: 8px 18px; border-radius: var(--r-pill); border: 1px solid var(--navy);
+    background: var(--card); color: var(--navy); font-size: 12px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+  }
+  .direction-toggle-btn:hover { background: var(--accent-soft); }
+  .quiz-progress { text-align: center; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .quiz-panel {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 40px 32px; text-align: center; margin-bottom: 22px;
+  }
+  .quiz-question-label { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .quiz-jp { font-size: 28px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+  .quiz-kana { font-size: 14px; color: var(--ink-soft); }
+  .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .quiz-option {
+    padding: 16px 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    font-size: 14px; border-radius: var(--r-md); cursor: pointer; font-family: inherit;
+  }
+  .quiz-option:hover:not(:disabled) { border-color: var(--navy); }
+  .quiz-option.correct { background: #DCEADD; border-color: #4E7D54; color: #294A2D; }
+  .quiz-option.wrong { background: #F1DCDC; border-color: #97393B; color: #6B2829; }
+  .quiz-option:disabled { cursor: default; }
+  .quiz-feedback { text-align: center; margin-top: 16px; font-size: 13px; color: var(--navy); min-height: 18px; }
+  .quiz-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; }
+  .quiz-score { font-size: 13px; color: var(--ink-soft); }
+  .quiz-score strong { color: var(--navy); }
+  .next-btn {
+    padding: 9px 22px; border-radius: var(--r-pill); background: var(--navy); color: var(--on-accent);
+    border: none; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+  .next-btn:disabled { opacity: 0.35; cursor: default; }
+  .quiz-result { text-align: center; padding: 50px 30px; }
+  .quiz-result .big-score { font-size: 46px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .quiz-result .result-msg { color: var(--ink-soft); font-size: 14px; margin-bottom: 22px; }
+  .restart-btn {
+    padding: 10px 28px; border-radius: var(--r-pill); background: var(--navy); color: var(--on-accent);
+    border: none; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+
+  /* ====== CONFUSE ====== */
+  .confuse-row {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 18px 22px; margin-bottom: 12px;
+  }
+  .confuse-title { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .confuse-items { display: flex; gap: 12px; flex-wrap: wrap; }
+  .confuse-pill {
+    background: var(--card-alt); border: 1px solid var(--line); border-radius: var(--r-pill);
+    padding: 10px 18px; font-size: 14px;
+  }
+  .confuse-pill .k { font-weight: 700; color: var(--ink); }
+  .confuse-pill .z { font-size: 12px; color: var(--muted); margin-left: 6px; }
+
+  /* ====== PHRASE ====== */
+  .phrase-toolbar {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 4px;
+  }
+  .phrase-toggle-group { display: flex; gap: 8px; flex-shrink: 0; }
+  .phrase-toggle-btn {
+    padding: 7px 16px; border-radius: var(--r-pill); border: 1px solid var(--line);
+    background: var(--card); color: var(--ink-soft); font-size: 12px; cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .phrase-toggle-btn:hover { border-color: var(--navy); color: var(--ink); }
+  .phrase-toggle-btn[data-on="true"] {
+    background: var(--navy); border-color: var(--navy); color: var(--on-accent); font-weight: 700;
+  }
+
+  .scene-tabbar {
+    display: flex; gap: 8px; margin: 0 auto 16px; flex-wrap: wrap; justify-content: center; max-width: 680px;
+  }
+  .scene-tab-item {
+    padding: 9px 20px; border-radius: var(--r-pill); border: 1px solid var(--line);
+    background: var(--card); color: var(--ink-soft); font-size: 13px; cursor: pointer; user-select: none;
+  }
+  .scene-tab-item:hover { border-color: var(--navy); color: var(--ink); }
+  .scene-tab-item.active { background: var(--navy); border-color: var(--navy); color: var(--on-accent); font-weight: 700; }
+
+  .scenario-tabbar {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 0 auto 16px; max-width: 680px;
+  }
+  .scenario-tab-item {
+    padding: 9px 14px; border-radius: var(--r-pill); border: 1px solid var(--line);
+    background: var(--card); color: var(--ink-soft); font-size: 13px; cursor: pointer;
+    user-select: none; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .scenario-tab-item:hover { border-color: var(--navy); color: var(--ink); }
+  .scenario-tab-item.active { background: var(--navy); border-color: var(--navy); color: var(--on-accent); font-weight: 700; }
+
+  .playall-row {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    max-width: 680px; margin: 0 auto 18px;
+  }
+  .playall-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 22px; border-radius: var(--r-pill); border: 1px solid var(--navy);
+    background: var(--card); color: var(--navy); font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .playall-btn:hover { background: var(--accent-soft); }
+  .playall-btn.active { background: var(--navy); color: var(--on-accent); }
+  .playall-btn svg { width: 14px; height: 14px; }
+
+  .phrase-list { display: flex; flex-direction: column; gap: 12px; max-width: 680px; margin: 0 auto; }
+
+  .phrase-row { display: flex; gap: 12px; align-items: flex-start; transition: background 0.2s ease; }
+  .phrase-row.driver { justify-content: flex-start; }
+  .phrase-row.passenger { justify-content: flex-end; }
+  .phrase-row.speaking .phrase-bubble { border-color: var(--navy); box-shadow: 0 0 0 2px var(--accent-soft); }
+
+  .speaker-tag {
+    flex-shrink: 0; width: 52px; text-align: center; font-size: 11px;
+    padding: 4px 0; border-radius: var(--r-pill); font-weight: 700; margin-top: 4px;
+  }
+  .phrase-row.driver .speaker-tag { background: var(--accent-soft); color: var(--navy); }
+  .phrase-row.passenger .speaker-tag { background: var(--card-alt); color: var(--ink-soft); order: 2; }
+
+  .phrase-bubble {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 14px 18px; max-width: 480px;
+  }
+  .phrase-row.driver .phrase-bubble { border-top-left-radius: 4px; }
+  .phrase-row.passenger .phrase-bubble { border-top-right-radius: 4px; background: var(--card-alt); }
+
+  .phrase-jp-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+  .phrase-jp { font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.6; }
+  .phrase-jp .furi {
+    position: relative; cursor: help; border-bottom: 1px dashed var(--line);
+  }
+  .phrase-jp .furi::after {
+    content: attr(data-kana);
+    position: absolute; bottom: 100%; left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    margin-bottom: 6px;
+    background: var(--navy); color: var(--on-accent);
+    font-size: 11px; font-weight: 500; padding: 4px 9px; border-radius: var(--r-sm);
+    white-space: nowrap; opacity: 0; visibility: hidden;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: none; z-index: 5;
+  }
+  .phrase-jp .furi:hover::after,
+  .phrase-jp .furi.show-tooltip::after { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+
+  .speak-btn {
+    flex-shrink: 0; width: 26px; height: 26px; border-radius: var(--r-pill);
+    border: 1px solid var(--line); background: var(--card); color: var(--ink-soft);
+    cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 1px;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .speak-btn:hover { border-color: var(--navy); color: var(--navy); }
+  .speak-btn.playing { background: var(--navy); border-color: var(--navy); color: var(--on-accent); }
+  .speak-btn svg { width: 13px; height: 13px; }
+
+  .phrase-zh { font-size: 13px; color: var(--ink-soft); display: none; font-family: "Noto Sans TC", sans-serif; }
+  body.show-zh .phrase-zh { display: block; }
+
+  @media (max-width: 860px) {
+    .quiz-options { grid-template-columns: 1fr; }
+  }
+  :focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-title">日本計程車日語學習工具</span>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-sub">速查 ・ 單字卡 ・ 測驗 ・ 易混淆點</span>
+    <button class="theme-toggle" id="themeToggle" title="切換晝夜模式" aria-label="切換晝夜模式">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4.5"></circle>
+        <line x1="12" y1="2.5" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="21.5"></line>
+        <line x1="4.2" y1="4.2" x2="6" y2="6"></line><line x1="18" y1="18" x2="19.8" y2="19.8"></line>
+        <line x1="2.5" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="21.5" y2="12"></line>
+        <line x1="4.2" y1="19.8" x2="6" y2="18"></line><line x1="18" y1="6" x2="19.8" y2="4.2"></line>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<nav class="tabbar" id="modeTabbar">
+  <div class="tab-item active" data-mode="ref">速查表</div>
+  <div class="tab-item" data-mode="study">單字卡</div>
+  <div class="tab-item" data-mode="phrase">常用句</div>
+</nav>
+
+<nav class="subtabbar" id="catTabbar"></nav>
+
+<main class="main">
+
+  <!-- REF VIEW -->
+  <section class="view active" id="view-ref">
+    <nav class="inner-tabbar" id="refInnerTabbar">
+      <div class="inner-tab-item active" data-submode="lookup">查詢</div>
+      <div class="inner-tab-item" data-submode="confuse">易混淆</div>
+    </nav>
+    <div class="inner-view active" id="ref-lookup">
+      <div class="ref-toolbar-row">
+        <p class="section-label" id="refLookupHint">點擊單字查看假名與中文意思</p>
+        <button class="phrase-toggle-btn" id="toggleRefZh" data-on="false">全顯示</button>
+      </div>
+      <div class="ref-grid" id="refGrid"></div>
+    </div>
+    <div class="inner-view" id="ref-confuse">
+      <p class="section-label">容易混淆的單字組</p>
+      <div id="confuseList"></div>
+    </div>
+  </section>
+
+  <!-- STUDY VIEW -->
+  <section class="view" id="view-study">
+    <div class="study-toolbar-row">
+      <nav class="inner-tabbar" id="studyInnerTabbar">
+        <div class="inner-tab-item active" data-submode="memorize">記憶</div>
+        <div class="inner-tab-item" data-submode="quiz">測驗</div>
+      </nav>
+      <button class="direction-toggle-btn" id="directionToggleBtn" type="button" style="display:none;">切換為「中→日」</button>
+    </div>
+    <div class="inner-view active" id="study-memorize">
+      <p class="section-label">點擊卡片查看中文意思</p>
+      <div class="study-layout">
+        <div class="card-panel" id="flashcard">
+          <span class="card-index-tag" id="cardIndexTag">1 / 10</span>
+          <div class="card-jp" id="cardJp"></div>
+          <div class="card-kana" id="cardKana"></div>
+          <div class="card-zh" id="cardZh"></div>
+          <div class="card-hint" id="cardHint">點擊卡片看中文</div>
+        </div>
+        <div class="card-nav-row">
+          <button class="nav-btn" id="prevBtn">‹</button>
+          <span class="nav-counter" id="navCounter">1 / 10</span>
+          <button class="nav-btn" id="nextBtn">›</button>
+          <button class="shuffle-btn" id="shuffleBtn">隨機排序</button>
+        </div>
+      </div>
+    </div>
+    <div class="inner-view" id="study-quiz">
+      <div class="quiz-wrap">
+        <div class="quiz-progress" id="quizProgress">第 1 題 / 共 10 題</div>
+        <div id="quizContent">
+          <div class="quiz-panel">
+            <div class="quiz-question-label" id="quizQuestionLabel">這個單字的中文意思是？</div>
+            <div class="quiz-jp" id="quizJp"></div>
+            <div class="quiz-kana" id="quizKana"></div>
+          </div>
+          <div class="quiz-options" id="quizOptions"></div>
+          <div class="quiz-feedback" id="quizFeedback"></div>
+          <div class="quiz-footer">
+            <span class="quiz-score">得分 <strong id="scoreText">0 / 0</strong></span>
+            <button class="next-btn" id="nextQuestionBtn" disabled>下一題</button>
+          </div>
+        </div>
+        <div id="quizResultView" style="display:none;">
+          <div class="quiz-panel quiz-result">
+            <div class="big-score" id="finalScore">0 / 10</div>
+            <div class="result-msg" id="resultMsg"></div>
+            <button class="restart-btn" id="restartBtn">再測一次</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHRASE VIEW -->
+  <section class="view" id="view-phrase">
+    <div class="phrase-toolbar">
+      <p class="section-label">依場景查看計程車常用對話。滑鼠移到日文上可看假名，點喇叭可播放發音</p>
+      <div class="phrase-toggle-group">
+        <button class="phrase-toggle-btn" id="toggleZh" data-on="false">中文</button>
+      </div>
+    </div>
+    <nav class="scene-tabbar" id="sceneTabbar"></nav>
+    <nav class="scenario-tabbar" id="scenarioTabbar"></nav>
+    <div class="playall-row">
+      <button class="playall-btn" id="playAllBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="playAllIcon">
+          <polygon points="6 4 20 12 6 20 6 4"></polygon>
+        </svg>
+        <span id="playAllLabel">全部播放本情境</span>
+      </button>
+    </div>
+    <div class="phrase-list" id="phraseList"></div>
+  </section>
+
+</main>
+
+<script>
+// ============================================================
+// VOCAB DATA
+// ============================================================
+const VOCAB_DATA = {
+  fare: {
+    label: "基本車資・計費",
+    items: [
+      { jp: "初乗り料金", kana: "はつのりりょうきん", zh: "起跳費（起步價）" },
+      { jp: "メーター", kana: "めーたー", zh: "計費錶" },
+      { jp: "加算料金", kana: "かさんりょうきん", zh: "跳錶計費金額" },
+      { jp: "深夜割増", kana: "しんやわりまし", zh: "深夜加成費用" },
+      { jp: "高速料金", kana: "こうそくりょうきん", zh: "高速公路費" },
+      { jp: "迎車料金", kana: "げいしゃりょうきん", zh: "叫車（接送）費用" },
+      { jp: "配車アプリ", kana: "はいしゃあぷり", zh: "叫車App" },
+      { jp: "領収書", kana: "りょうしゅうしょ", zh: "收據" },
+      { jp: "お釣り", kana: "おつり", zh: "找零" },
+      { jp: "クレジットカード払い", kana: "くれじっとかーどばらい", zh: "信用卡付款" },
+      { jp: "現金払い", kana: "げんきんばらい", zh: "現金付款" },
+      { jp: "交通費", kana: "こうつうひ", zh: "交通費" },
+    ],
+  },
+  destination: {
+    label: "地點・目的地",
+    items: [
+      { jp: "目的地", kana: "もくてきち", zh: "目的地" },
+      { jp: "〜まで行ってください", kana: "〜までいってください", zh: "請載我到〜" },
+      { jp: "駅", kana: "えき", zh: "車站" },
+      { jp: "空港", kana: "くうこう", zh: "機場" },
+      { jp: "ホテル", kana: "ほてる", zh: "飯店" },
+      { jp: "交差点", kana: "こうさてん", zh: "十字路口" },
+      { jp: "信号", kana: "しんごう", zh: "紅綠燈" },
+      { jp: "右折", kana: "うせつ", zh: "右轉" },
+      { jp: "左折", kana: "させつ", zh: "左轉" },
+      { jp: "直進", kana: "ちょくしん", zh: "直行" },
+      { jp: "Uターン", kana: "Uたーん", zh: "迴轉" },
+      { jp: "近道", kana: "ちかみち", zh: "近路、捷徑" },
+      { jp: "渋滞", kana: "じゅうたい", zh: "塞車" },
+      { jp: "到着", kana: "とうちゃく", zh: "到達" },
+    ],
+  },
+  equipment: {
+    label: "車內設備・服務",
+    items: [
+      { jp: "自動ドア", kana: "じどうどあ", zh: "自動車門" },
+      { jp: "シートベルト", kana: "しーとべると", zh: "安全帶" },
+      { jp: "チャイルドシート", kana: "ちゃいるどしーと", zh: "兒童安全座椅" },
+      { jp: "エアコン", kana: "えあこん", zh: "冷暖氣" },
+      { jp: "トランク", kana: "とらんく", zh: "行李廂" },
+      { jp: "Wi-Fi", kana: "わいふぁい", zh: "Wi-Fi" },
+      { jp: "充電ケーブル", kana: "じゅうでんけーぶる", zh: "充電線" },
+      { jp: "領収書発行機", kana: "りょうしゅうしょはっこうき", zh: "收據列印機" },
+      { jp: "カーナビ", kana: "かーなび", zh: "衛星導航" },
+      { jp: "禁煙車", kana: "きんえんしゃ", zh: "禁菸車" },
+      { jp: "ペット同乗", kana: "ぺっとどうじょう", zh: "寵物同乘" },
+    ],
+  },
+  language: {
+    label: "司機・乘客用語",
+    items: [
+      { jp: "乗客", kana: "じょうきゃく", zh: "乘客" },
+      { jp: "運転手", kana: "うんてんしゅ", zh: "司機" },
+      { jp: "乗り場", kana: "のりば", zh: "乘車處" },
+      { jp: "乗車", kana: "じょうしゃ", zh: "上車" },
+      { jp: "降車", kana: "こうしゃ", zh: "下車" },
+      { jp: "停車", kana: "ていしゃ", zh: "停車" },
+      { jp: "空車", kana: "くうしゃ", zh: "空車（可搭乘）" },
+      { jp: "回送", kana: "かいそう", zh: "回送（不載客）" },
+      { jp: "タクシー乗り場", kana: "たくしーのりば", zh: "計程車乘車區" },
+      { jp: "手荷物", kana: "てにもつ", zh: "手提行李" },
+      { jp: "忘れ物", kana: "わすれもの", zh: "遺忘物品" },
+      { jp: "急いでいます", kana: "いそいでいます", zh: "我趕時間" },
+    ],
+  },
+};
+
+const CONFUSE_GROUPS = [
+  {
+    title: "車輛狀態易混：空車 vs 回送 vs 賃走",
+    items: [
+      { jp: "空車", kana: "くうしゃ", zh: "空車，可以搭乘" },
+      { jp: "回送", kana: "かいそう", zh: "回送中，不載客" },
+      { jp: "賃走", kana: "ちんそう", zh: "已有乘客，行駛中" },
+    ],
+  },
+  {
+    title: "付款方式易混：現金払い vs クレジットカード払い vs 電子マネー払い",
+    items: [
+      { jp: "現金払い", kana: "げんきんばらい", zh: "用現金付款" },
+      { jp: "クレジットカード払い", kana: "くれじっとかーどばらい", zh: "用信用卡付款" },
+      { jp: "電子マネー払い", kana: "でんしまねーばらい", zh: "用電子錢包付款（如Suica）" },
+    ],
+  },
+  {
+    title: "費用種類易混：初乗り料金 vs 加算料金 vs 深夜割増",
+    items: [
+      { jp: "初乗り料金", kana: "はつのりりょうきん", zh: "起跳的基本費用" },
+      { jp: "加算料金", kana: "かさんりょうきん", zh: "超過基本距離後的跳錶計費" },
+      { jp: "深夜割増", kana: "しんやわりまし", zh: "深夜（通常22時〜翌5時）的額外加收" },
+    ],
+  },
+  {
+    title: "轉向易混：右折 vs 左折 vs 直進 vs Uターン",
+    items: [
+      { jp: "右折", kana: "うせつ", zh: "右轉" },
+      { jp: "左折", kana: "させつ", zh: "左轉" },
+      { jp: "直進", kana: "ちょくしん", zh: "直行" },
+      { jp: "Uターン", kana: "Uたーん", zh: "迴轉" },
+    ],
+  },
+  {
+    title: "上下車易混：乗車 vs 降車 vs 停車",
+    items: [
+      { jp: "乗車", kana: "じょうしゃ", zh: "上車、搭乘" },
+      { jp: "降車", kana: "こうしゃ", zh: "下車" },
+      { jp: "停車", kana: "ていしゃ", zh: "停車（暫時停下）" },
+    ],
+  },
+  {
+    title: "叫車方式易混：流し vs 配車アプリ vs 乗り場",
+    items: [
+      { jp: "流し", kana: "ながし", zh: "在路邊攔空車" },
+      { jp: "配車アプリ", kana: "はいしゃあぷり", zh: "用App叫車" },
+      { jp: "タクシー乗り場", kana: "たくしーのりば", zh: "在指定計程車乘車區候車" },
+    ],
+  },
+];
+
+// ============================================================
+// KANJI READINGS（用於常用句假名標注）
+// ============================================================
+const KANJI_READINGS = [
+  ["かしこまりました", "かしこまりました"],
+  ["承知いたしました", "しょうちいたしました"],
+  ["申し訳ございません", "もうしわけございません"],
+  ["大変申し訳ございません", "たいへんもうしわけございません"],
+  ["失礼いたします", "しつれいいたします"],
+  ["恐れ入ります", "おそれいります"],
+  ["少々お待ちください", "しょうしょうおまちください"],
+  ["お待たせいたしました", "おまたせいたしました"],
+  ["目的地", "もくてきち"],
+  ["〜まで行ってください", "〜までいってください"],
+  ["こちらまで", "こちらまで"],
+  ["〜に向かってください", "〜にむかってください"],
+  ["右折してください", "うせつしてください"],
+  ["左折してください", "させつしてください"],
+  ["直進してください", "ちょくしんしてください"],
+  ["次の信号", "つぎのしんごう"],
+  ["次の交差点", "つぎのこうさてん"],
+  ["交差点", "こうさてん"],
+  ["信号", "しんごう"],
+  ["右折", "うせつ"],
+  ["左折", "させつ"],
+  ["直進", "ちょくしん"],
+  ["Uターン", "Uたーん"],
+  ["渋滞", "じゅうたい"],
+  ["近道", "ちかみち"],
+  ["到着", "とうちゃく"],
+  ["到着しました", "とうちゃくしました"],
+  ["目的地に到着しました", "もくてきちにとうちゃくしました"],
+  ["料金", "りょうきん"],
+  ["お会計", "おかいけい"],
+  ["合計", "ごうけい"],
+  ["初乗り料金", "はつのりりょうきん"],
+  ["加算料金", "かさんりょうきん"],
+  ["深夜割増", "しんやわりまし"],
+  ["高速料金", "こうそくりょうきん"],
+  ["迎車料金", "げいしゃりょうきん"],
+  ["領収書", "りょうしゅうしょ"],
+  ["領収書をいただけますか", "りょうしゅうしょをいただけますか"],
+  ["お釣り", "おつり"],
+  ["現金払い", "げんきんばらい"],
+  ["クレジットカード払い", "くれじっとかーどばらい"],
+  ["電子マネー払い", "でんしまねーばらい"],
+  ["配車アプリ", "はいしゃあぷり"],
+  ["乗客", "じょうきゃく"],
+  ["運転手", "うんてんしゅ"],
+  ["乗り場", "のりば"],
+  ["乗車", "じょうしゃ"],
+  ["降車", "こうしゃ"],
+  ["停車", "ていしゃ"],
+  ["空車", "くうしゃ"],
+  ["回送", "かいそう"],
+  ["タクシー乗り場", "たくしーのりば"],
+  ["手荷物", "てにもつ"],
+  ["忘れ物", "わすれもの"],
+  ["急いでいます", "いそいでいます"],
+  ["急いでいるので", "いそいでいるので"],
+  ["急いでいるのですが", "いそいでいるのですが"],
+  ["自動ドア", "じどうどあ"],
+  ["シートベルト", "しーとべると"],
+  ["シートベルトをお締めください", "しーとべるとをおしめください"],
+  ["チャイルドシート", "ちゃいるどしーと"],
+  ["トランク", "とらんく"],
+  ["トランクに入れていただけますか", "とらんくにいれていただけますか"],
+  ["充電ケーブル", "じゅうでんけーぶる"],
+  ["カーナビ", "かーなび"],
+  ["禁煙車", "きんえんしゃ"],
+  ["空港", "くうこう"],
+  ["羽田空港", "はねだくうこう"],
+  ["成田空港", "なりたくうこう"],
+  ["新宿駅", "しんじゅくえき"],
+  ["渋谷駅", "しぶやえき"],
+  ["どちらまで", "どちらまで"],
+  ["どちらにまいりますか", "どちらにまいりますか"],
+  ["こちらの住所まで", "こちらのじゅうしょまで"],
+  ["住所", "じゅうしょ"],
+  ["この地図を見せてもよろしいですか", "このちずをみせてもよろしいですか"],
+  ["地図", "ちず"],
+  ["地図を見せていただけますか", "ちずをみせていただけますか"],
+  ["だいたい何分かかりますか", "だいたいなんぷんかかりますか"],
+  ["何分ほどかかりますか", "なんぷんほどかかりますか"],
+  ["何分かかりますか", "なんぷんかかりますか"],
+  ["三十分ほど", "さんじゅっぷんほど"],
+  ["二十分ほど", "にじゅっぷんほど"],
+  ["十分ほど", "じゅっぷんほど"],
+  ["五分ほど", "ごふんほど"],
+  ["高速道路", "こうそくどうろ"],
+  ["高速を使ってもいいですか", "こうそくをつかってもいいですか"],
+  ["高速を使いますか", "こうそくをつかいますか"],
+  ["一般道で行ってください", "いっぱんどうでいってください"],
+  ["一般道", "いっぱんどう"],
+  ["あそこで降ろしてください", "あそこでおろしてください"],
+  ["ここで降ろしてください", "ここでおろしてください"],
+  ["止めてください", "とめてください"],
+  ["止まってください", "とまってください"],
+  ["とめてください", "とめてください"],
+  ["少し先で止めてください", "すこしさきでとめてください"],
+  ["角を曲がったところで止めてください", "かどをまがったところでとめてください"],
+  ["コンビニの前で止めてください", "こんびにのまえでとめてください"],
+  ["ビルの前で", "びるのまえで"],
+  ["ホテルの前で", "ほてるのまえで"],
+  ["駅の前で", "えきのまえで"],
+  ["温度を下げていただけますか", "おんどをさげていただけますか"],
+  ["温度を上げていただけますか", "おんどをあげていただけますか"],
+  ["エアコンを弱めていただけますか", "えあこんをよわめていただけますか"],
+  ["エアコン", "えあこん"],
+  ["もう少し", "もうすこし"],
+  ["少し", "すこし"],
+  ["ありがとうございます", "ありがとうございます"],
+  ["ありがとうございました", "ありがとうございました"],
+  ["お世話になりました", "おせわになりました"],
+  ["お気をつけて", "おきをつけて"],
+  ["ご乗車ありがとうございます", "ごじょうしゃありがとうございます"],
+  ["ご利用ありがとうございます", "ごりようありがとうございます"],
+  ["またのご利用をお待ちしております", "またのごりようをおまちしております"],
+  ["領収書の発行", "りょうしゅうしょのはっこう"],
+  ["宛名", "あてな"],
+  ["宛名はどのようにいたしましょうか", "あてなはどのようにいたしましょうか"],
+  ["忘れ物はございませんか", "わすれものはございませんか"],
+  ["忘れ物をしたかもしれません", "わすれものをしたかもしれません"],
+  ["連絡先", "れんらくさき"],
+  ["警察", "けいさつ"],
+  ["救急車", "きゅうきゅうしゃ"],
+  ["病院", "びょういん"],
+  ["具合が悪い", "ぐあいがわるい"],
+  ["気分が悪い", "きぶんがわるい"],
+  ["止めてもらえますか", "とめてもらえますか"],
+  ["事故", "じこ"],
+  ["ぶつかりました", "ぶつかりました"],
+  ["危ない", "あぶない"],
+  ["ゆっくり走ってください", "ゆっくりはしってください"],
+  ["スピードを落としてください", "すぴーどをおとしてください"],
+];
+
+KANJI_READINGS.sort((a, b) => b[0].length - a[0].length);
+
+function buildFuriganaHTML(text) {
+  let result = '';
+  let i = 0;
+  while (i < text.length) {
+    let matched = false;
+    for (const [word, kana] of KANJI_READINGS) {
+      if (text.startsWith(word, i) && /[\u4E00-\u9FFF]/.test(word)) {
+        result += `<span class="furi" data-kana="${kana}">${word}</span>`;
+        i += word.length;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) { result += text[i]; i += 1; }
+  }
+  return result;
+}
+
+// ============================================================
+// PHRASE DATA
+// ============================================================
+const PHRASE_DATA = {
+  hailing: {
+    label: "叫車・上車",
+    scenarios: [
+      {
+        label: "情境一：路邊攔車",
+        items: [
+          { speaker: "passenger", jp: "すみません、タクシーですか？", kana: "すみません、たくしーですか？", zh: "不好意思，你是計程車嗎？" },
+          { speaker: "driver", jp: "はい、空車です。どちらまでまいりますか？", kana: "はい、くうしゃです。どちらまでまいりますか？", zh: "是的，空車。請問要去哪裡呢？" },
+          { speaker: "passenger", jp: "新宿駅までお願いします。", kana: "しんじゅくえきまでおねがいします。", zh: "麻煩到新宿車站。" },
+          { speaker: "driver", jp: "かしこまりました。お乗りください。", kana: "かしこまりました。おのりください。", zh: "好的，請上車。" },
+          { speaker: "passenger", jp: "荷物をトランクに入れていただけますか？", kana: "にもつをとらんくにいれていただけますか？", zh: "可以幫我把行李放到行李廂嗎？" },
+          { speaker: "driver", jp: "もちろんです。少々お待ちください。", kana: "もちろんです。しょうしょうおまちください。", zh: "當然，請稍等。" },
+          { speaker: "driver", jp: "シートベルトをお締めください。", kana: "しーとべるとをおしめください。", zh: "請繫好安全帶。" },
+          { speaker: "passenger", jp: "わかりました、ありがとうございます。", kana: "わかりました、ありがとうございます。", zh: "好的，謝謝你。" },
+        ],
+      },
+      {
+        label: "情境二：配車App叫車",
+        items: [
+          { speaker: "driver", jp: "ご乗車ありがとうございます。山田様でよろしいでしょうか？", kana: "ごじょうしゃありがとうございます。やまださまでよろしいでしょうか？", zh: "感謝您的搭乘，請問是山田先生／小姐嗎？" },
+          { speaker: "passenger", jp: "はい、そうです。よろしくお願いします。", kana: "はい、そうです。よろしくおねがいします。", zh: "是的，麻煩你了。" },
+          { speaker: "driver", jp: "アプリで目的地を確認しております。羽田空港でよろしいでしょうか。", kana: "あぷりでもくてきちをかくにんしております。はねだくうこうでよろしいでしょうか。", zh: "我已透過App確認目的地，是羽田機場對嗎？" },
+          { speaker: "passenger", jp: "はい、第一ターミナルをお願いします。", kana: "はい、だいいちたーみなるをおねがいします。", zh: "是的，麻煩去第一航廈。" },
+          { speaker: "driver", jp: "承知いたしました。高速道路を使ってもよろしいでしょうか。", kana: "しょうちいたしました。こうそくどうろをつかってもよろしいでしょうか。", zh: "了解，可以走高速公路嗎？" },
+          { speaker: "passenger", jp: "はい、急いでいますので、高速を使ってください。", kana: "はい、いそいでいますので、こうそくをつかってください。", zh: "好的，我趕時間，請走高速。" },
+          { speaker: "driver", jp: "かしこまりました。だいたい四十分ほどかかります。", kana: "かしこまりました。だいたいよんじゅっぷんほどかかります。", zh: "好的，大約需要四十分鐘左右。" },
+          { speaker: "passenger", jp: "わかりました。シートベルトをしてもよろしいですか？", kana: "わかりました。しーとべるとをしてもよろしいですか？", zh: "了解。我繫安全帶可以嗎？（已上車確認）" },
+          { speaker: "driver", jp: "もちろんです。どうぞ。", kana: "もちろんです。どうぞ。", zh: "當然，請便。" },
+        ],
+      },
+      {
+        label: "情境三：計程車乘車區",
+        items: [
+          { speaker: "passenger", jp: "すみません、タクシー乗り場はどこですか？", kana: "すみません、たくしーのりばはどこですか？", zh: "不好意思，計程車乘車區在哪裡？" },
+          { speaker: "driver", jp: "こちらがタクシー乗り場です。どうぞお乗りください。", kana: "こちらがたくしーのりばです。どうぞおのりください。", zh: "這裡就是計程車乘車區，請上車。" },
+          { speaker: "passenger", jp: "ありがとうございます。渋谷駅までお願いします。", kana: "ありがとうございます。しぶやえきまでおねがいします。", zh: "謝謝，麻煩到澀谷車站。" },
+          { speaker: "driver", jp: "かしこまりました。お荷物はございますか？", kana: "かしこまりました。おにもつはございますか？", zh: "好的，請問有行李嗎？" },
+          { speaker: "passenger", jp: "こちらのスーツケースを一つお願いします。", kana: "こちらのすーつけーすをひとつおねがいします。", zh: "這個行李箱一個，麻煩你了。" },
+          { speaker: "driver", jp: "かしこまりました。トランクに入れますね。", kana: "かしこまりました。とらんくにいれますね。", zh: "好的，我放進行李廂囉。" },
+          { speaker: "passenger", jp: "ありがとうございます。", kana: "ありがとうございます。", zh: "謝謝你。" },
+          { speaker: "driver", jp: "では、出発いたします。シートベルトをお忘れなく。", kana: "では、しゅっぱついたします。しーとべるとをおわすれなく。", zh: "那麼，出發了。別忘了繫安全帶。" },
+        ],
+      },
+      {
+        label: "情境四：目的地確認（出示地圖）",
+        items: [
+          { speaker: "passenger", jp: "すみません、この地図を見せていただけますか。ここに行きたいのですが。", kana: "すみません、このちずをみせていただけますか。ここにいきたいのですが。", zh: "不好意思，可以看一下這張地圖嗎？我想去這裡。" },
+          { speaker: "driver", jp: "拝見します。〜ですね。承知いたしました。", kana: "はいけんします。〜ですね。しょうちいたしました。", zh: "我看一下。是〜對吧，了解了。" },
+          { speaker: "passenger", jp: "だいたい何分かかりますか？", kana: "だいたいなんぷんかかりますか？", zh: "大概需要幾分鐘？" },
+          { speaker: "driver", jp: "渋滞次第ですが、二十分から三十分ほどかと思います。", kana: "じゅうたいしだいですが、にじゅっぷんからさんじゅっぷんほどかとおもいます。", zh: "要看塞車狀況，大概二十到三十分鐘左右。" },
+          { speaker: "passenger", jp: "渋滞していますか？", kana: "じゅうたいしていますか？", zh: "現在塞車嗎？" },
+          { speaker: "driver", jp: "少し渋滞しておりますが、近道で行きますので大丈夫かと存じます。", kana: "すこしじゅうたいしておりますが、ちかみちでいきますのでだいじょうぶかとぞんじます。", zh: "有一點塞車，但我走捷徑，應該沒問題。" },
+          { speaker: "passenger", jp: "わかりました、よろしくお願いします。", kana: "わかりました、よろしくおねがいします。", zh: "了解，麻煩你了。" },
+          { speaker: "driver", jp: "かしこまりました。では出発いたします。", kana: "かしこまりました。ではしゅっぱついたします。", zh: "好的，那我們出發了。" },
+        ],
+      },
+    ],
+  },
+  onboard: {
+    label: "車內對話・指路",
+    scenarios: [
+      {
+        label: "情境一：途中指路",
+        items: [
+          { speaker: "passenger", jp: "あの、次の信号を右折してください。", kana: "あの、つぎのしんごうをうせつしてください。", zh: "那個，下一個紅綠燈請右轉。" },
+          { speaker: "driver", jp: "次の信号を右折ですね、承知いたしました。", kana: "つぎのしんごうをうせつですね、しょうちいたしました。", zh: "下一個紅綠燈右轉，了解了。" },
+          { speaker: "passenger", jp: "その後、しばらく直進してください。", kana: "そのあと、しばらくちょくしんしてください。", zh: "之後，請直行一段路。" },
+          { speaker: "driver", jp: "かしこまりました。", kana: "かしこまりました。", zh: "好的。" },
+          { speaker: "passenger", jp: "コンビニの前で止めてください。", kana: "こんびにのまえでとめてください。", zh: "請在便利商店前停車。" },
+          { speaker: "driver", jp: "コンビニの前ですね、少々お待ちください。", kana: "こんびにのまえですね、しょうしょうおまちください。", zh: "便利商店前，請稍候。" },
+          { speaker: "passenger", jp: "あ、もう少し先でお願いします。", kana: "あ、もうすこしさきでおねがいします。", zh: "啊，再往前一點點。" },
+          { speaker: "driver", jp: "こちらでよろしいでしょうか？", kana: "こちらでよろしいでしょうか？", zh: "這裡可以嗎？" },
+          { speaker: "passenger", jp: "はい、ここで大丈夫です。ありがとうございます。", kana: "はい、ここでだいじょうぶです。ありがとうございます。", zh: "好的，這裡可以。謝謝你。" },
+        ],
+      },
+      {
+        label: "情境二：途中要求（溫度、速度）",
+        items: [
+          { speaker: "passenger", jp: "すみません、少し寒いのでエアコンを弱めていただけますか？", kana: "すみません、すこしさむいのでえあこんをよわめていただけますか？", zh: "不好意思，有點冷，可以把冷氣調弱一點嗎？" },
+          { speaker: "driver", jp: "申し訳ございません。ただいま調整いたします。", kana: "もうしわけございません。ただいまちょうせいいたします。", zh: "非常抱歉，我現在調整一下。" },
+          { speaker: "passenger", jp: "ありがとうございます。", kana: "ありがとうございます。", zh: "謝謝你。" },
+          { speaker: "passenger", jp: "あの、少しスピードを落としていただけますか？", kana: "あの、すこしすぴーどをおとしていただけますか？", zh: "那個，可以稍微減速嗎？" },
+          { speaker: "driver", jp: "失礼いたしました。ゆっくり走ります。", kana: "しつれいいたしました。ゆっくりはしります。", zh: "失禮了，我慢一點開。" },
+          { speaker: "passenger", jp: "ありがとうございます。急いでいるのですが、安全にお願いします。", kana: "ありがとうございます。いそいでいるのですが、あんぜんにおねがいします。", zh: "謝謝你。我雖然趕時間，但還是請安全駕駛。" },
+          { speaker: "driver", jp: "もちろんでございます。安全第一でまいります。", kana: "もちろんでございます。あんぜんだいいちでまいります。", zh: "當然，安全第一，我會注意的。" },
+          { speaker: "passenger", jp: "よろしくお願いします。", kana: "よろしくおねがいします。", zh: "麻煩你了。" },
+        ],
+      },
+      {
+        label: "情境三：詢問高速路線",
+        items: [
+          { speaker: "driver", jp: "高速道路を使ってもよろしいでしょうか。その場合、高速料金が別途かかります。", kana: "こうそくどうろをつかってもよろしいでしょうか。そのばあい、こうそくりょうきんがべつとかかります。", zh: "可以走高速公路嗎？那樣的話，高速費用會另外計算。" },
+          { speaker: "passenger", jp: "高速料金はだいたいいくらですか？", kana: "こうそくりょうきんはだいたいいくらですか？", zh: "高速費用大概多少錢？" },
+          { speaker: "driver", jp: "だいたい五百円から八百円ほどかと思います。", kana: "だいたいごひゃくえんからはっぴゃくえんほどかとおもいます。", zh: "大概五百到八百日圓左右。" },
+          { speaker: "passenger", jp: "わかりました。一般道で行ってください。", kana: "わかりました。いっぱんどうでいってください。", zh: "了解了，請走一般道路。" },
+          { speaker: "driver", jp: "承知いたしました。一般道ですと、渋滞次第で時間が変わりますがよろしいでしょうか。", kana: "しょうちいたしました。いっぱんどうですと、じゅうたいしだいでじかんがかわりますがよろしいでしょうか。", zh: "了解了，走一般道路的話，時間會依塞車情況而變，這樣可以嗎？" },
+          { speaker: "passenger", jp: "大丈夫です、お願いします。", kana: "だいじょうぶです、おねがいします。", zh: "沒關係，麻煩你了。" },
+          { speaker: "driver", jp: "かしこまりました。", kana: "かしこまりました。", zh: "好的。" },
+        ],
+      },
+      {
+        label: "情境四：深夜・特殊狀況",
+        items: [
+          { speaker: "driver", jp: "深夜料金が加算されますが、よろしいでしょうか。", kana: "しんやりょうきんがかさんされますが、よろしいでしょうか。", zh: "會加收深夜費用，這樣可以嗎？" },
+          { speaker: "passenger", jp: "わかりました。どのくらい高くなりますか？", kana: "わかりました。どのくらいたかくなりますか？", zh: "了解。會貴多少呢？" },
+          { speaker: "driver", jp: "通常料金の二割増となります。", kana: "つうじょうりょうきんのにわりましとなります。", zh: "是一般費用的兩成加成。" },
+          { speaker: "passenger", jp: "承知しました、お願いします。ちょっと急いでいるので、できるだけ早くお願いします。", kana: "しょうちしました、おねがいします。ちょっといそいでいるので、できるだけはやくおねがいします。", zh: "了解了，麻煩你。我有點趕，請盡量快一點。" },
+          { speaker: "driver", jp: "承知いたしました。できる限り急ぎます。", kana: "しょうちいたしました。できるかぎりいそぎます。", zh: "了解了，我盡量快一點。" },
+          { speaker: "passenger", jp: "ありがとうございます。", kana: "ありがとうございます。", zh: "謝謝你。" },
+          { speaker: "driver", jp: "ただいま目的地に近づいております。右側でよろしいでしょうか。", kana: "ただいももくてきちにちかづいております。みぎがわでよろしいでしょうか。", zh: "現在快到目的地了，在右側停可以嗎？" },
+          { speaker: "passenger", jp: "はい、右側でお願いします。", kana: "はい、みぎがわでおねがいします。", zh: "好的，請在右側停。" },
+        ],
+      },
+    ],
+  },
+  payment: {
+    label: "付款・下車",
+    scenarios: [
+      {
+        label: "情境一：現金結帳",
+        items: [
+          { speaker: "driver", jp: "目的地に到着しました。お会計は一千八百円でございます。", kana: "もくてきちにとうちゃくしました。おかいけいはせんはっぴゃくえんでございます。", zh: "已到達目的地，費用是一千八百日圓。" },
+          { speaker: "passenger", jp: "はい、二千円でお願いします。", kana: "はい、にせんえんでおねがいします。", zh: "好的，這是兩千日圓。" },
+          { speaker: "driver", jp: "二百円のお返しでございます。", kana: "にひゃくえんのおかえしでございます。", zh: "找您兩百日圓。" },
+          { speaker: "passenger", jp: "領収書をいただけますか？", kana: "りょうしゅうしょをいただけますか？", zh: "可以給我收據嗎？" },
+          { speaker: "driver", jp: "かしこまりました。宛名はどのようにいたしましょうか？", kana: "かしこまりました。あてなはどのようにいたしましょうか？", zh: "好的，抬頭要怎麼寫呢？" },
+          { speaker: "passenger", jp: "上様でお願いします。", kana: "うえさまでおねがいします。", zh: "寫「上様」就好了。" },
+          { speaker: "driver", jp: "かしこまりました。こちらでございます。", kana: "かしこまりました。こちらでございます。", zh: "好的，這是您的收據。" },
+          { speaker: "passenger", jp: "ありがとうございました。お世話になりました。", kana: "ありがとうございました。おせわになりました。", zh: "謝謝你，辛苦了。" },
+          { speaker: "driver", jp: "ありがとうございました。またのご利用をお待ちしております。", kana: "ありがとうございました。またのごりようをおまちしております。", zh: "謝謝您，期待您下次的搭乘。" },
+        ],
+      },
+      {
+        label: "情境二：信用卡付款",
+        items: [
+          { speaker: "driver", jp: "到着いたしました。お会計は二千三百円でございます。", kana: "とうちゃくいたしました。おかいけいはにせんさんびゃくえんでございます。", zh: "到了，費用是兩千三百日圓。" },
+          { speaker: "passenger", jp: "クレジットカードは使えますか？", kana: "くれじっとかーどはつかえますか？", zh: "可以使用信用卡嗎？" },
+          { speaker: "driver", jp: "はい、ご利用いただけます。こちらの端末にお願いします。", kana: "はい、ごりよういただけます。こちらのたんまつにおねがいします。", zh: "可以，請在這台機器操作。" },
+          { speaker: "passenger", jp: "わかりました。サインでよろしいですか？", kana: "わかりました。さいんでよろしいですか？", zh: "了解，簽名可以嗎？" },
+          { speaker: "driver", jp: "はい、こちらにご署名をお願いします。", kana: "はい、こちらにごしょめいをおねがいします。", zh: "好的，請在這裡簽名。" },
+          { speaker: "passenger", jp: "はい、こちらです。", kana: "はい、こちらです。", zh: "好的，這樣。" },
+          { speaker: "driver", jp: "ありがとうございます。領収書はご入用でしょうか。", kana: "ありがとうございます。りょうしゅうしょはごにゅうようでしょうか。", zh: "謝謝您，需要收據嗎？" },
+          { speaker: "passenger", jp: "はい、お願いします。", kana: "はい、おねがいします。", zh: "是的，麻煩你。" },
+          { speaker: "driver", jp: "こちらが領収書でございます。お気をつけて。", kana: "こちらがりょうしゅうしょでございます。おきをつけて。", zh: "這是您的收據，請慢走。" },
+          { speaker: "passenger", jp: "ありがとうございました。", kana: "ありがとうございました。", zh: "謝謝你。" },
+        ],
+      },
+      {
+        label: "情境三：下車與注意事項",
+        items: [
+          { speaker: "driver", jp: "到着いたしました。お忘れ物はございませんか？", kana: "とうちゃくいたしました。おわすれものはございませんか？", zh: "到了，請確認有沒有遺忘東西。" },
+          { speaker: "passenger", jp: "ちょっと確認します。…大丈夫です。", kana: "ちょっとかくにんします。…だいじょうぶです。", zh: "我確認一下。……沒問題。" },
+          { speaker: "driver", jp: "トランクのお荷物もお忘れなく。", kana: "とらんくのおにもつもおわすれなく。", zh: "也別忘了行李廂裡的行李。" },
+          { speaker: "passenger", jp: "あ、そうですね。ありがとうございます。", kana: "あ、そうですね。ありがとうございます。", zh: "啊，對呢，謝謝你。" },
+          { speaker: "driver", jp: "自動ドアでございますので、開きましたらお降りください。", kana: "じどうどあでございますので、ひらきましたらおおりください。", zh: "是自動車門，開了之後請下車。" },
+          { speaker: "passenger", jp: "わかりました。本当にありがとうございました。", kana: "わかりました。ほんとうにありがとうございました。", zh: "了解，真的非常感謝你。" },
+          { speaker: "driver", jp: "こちらこそ、ありがとうございました。お気をつけて。", kana: "こちらこそ、ありがとうございました。おきをつけて。", zh: "我也要謝謝您，請慢走。" },
+        ],
+      },
+      {
+        label: "情境四：途中下車・更改目的地",
+        items: [
+          { speaker: "passenger", jp: "すみません、目的地を変更してもいいですか？", kana: "すみません、もくてきちをへんこうしてもいいですか？", zh: "不好意思，可以更改目的地嗎？" },
+          { speaker: "driver", jp: "もちろんです。どちらに変更されますか？", kana: "もちろんです。どちらにへんこうされますか？", zh: "當然可以，要改去哪裡呢？" },
+          { speaker: "passenger", jp: "この先のコンビニで降ろしていただけますか？", kana: "このさきのこんびにでおろしていただけますか？", zh: "可以讓我在前面的便利商店下車嗎？" },
+          { speaker: "driver", jp: "承知いたしました。少々お待ちください。", kana: "しょうちいたしました。しょうしょうおまちください。", zh: "了解，請稍候。" },
+          { speaker: "driver", jp: "こちらでよろしいでしょうか？", kana: "こちらでよろしいでしょうか？", zh: "這裡可以嗎？" },
+          { speaker: "passenger", jp: "はい、ここで大丈夫です。いくらになりますか？", kana: "はい、ここでだいじょうぶです。いくらになりますか？", zh: "好的，這裡可以。費用是多少呢？" },
+          { speaker: "driver", jp: "メーターで九百円でございます。", kana: "めーたーできゅうひゃくえんでございます。", zh: "計費是九百日圓。" },
+          { speaker: "passenger", jp: "はい、こちらです。領収書は結構です。", kana: "はい、こちらです。りょうしゅうしょはけっこうです。", zh: "好的，這是錢。收據不用了。" },
+          { speaker: "driver", jp: "ありがとうございました。お気をつけて。", kana: "ありがとうございました。おきをつけて。", zh: "謝謝您，請慢走。" },
+        ],
+      },
+    ],
+  },
+  emergency: {
+    label: "緊急狀況・問題處理",
+    scenarios: [
+      {
+        label: "情境一：忘記物品",
+        items: [
+          { speaker: "passenger", jp: "すみません、タクシーに忘れ物をしたかもしれません。", kana: "すみません、たくしーにわすれものをしたかもしれません。", zh: "不好意思，我可能把東西忘在計程車裡了。" },
+          { speaker: "driver", jp: "どのようなお忘れ物でしょうか？", kana: "どのようなおわすれものでしょうか？", zh: "是忘了什麼東西呢？" },
+          { speaker: "passenger", jp: "スマートフォンを忘れたと思います。黒いケースに入っています。", kana: "すまーとふぉんをわすれたとおもいます。くろいけーすにはいっています。", zh: "我想我忘了手機，是裝在黑色殼裡的。" },
+          { speaker: "driver", jp: "少々お待ちください。確認いたします。", kana: "しょうしょうおまちください。かくにんいたします。", zh: "請稍等，我確認一下。" },
+          { speaker: "driver", jp: "ございました。ただいまそちらに戻ります。", kana: "ございました。ただいまそちらにもどります。", zh: "找到了，我現在回去那邊。" },
+          { speaker: "passenger", jp: "ありがとうございます、本当に助かりました。", kana: "ありがとうございます、ほんとうにたすかりました。", zh: "謝謝你，真的幫了大忙。" },
+          { speaker: "driver", jp: "お渡しできてよかったです。以後お気をつけください。", kana: "おわたしできてよかったです。いごおきをつけください。", zh: "能還給您真是太好了，以後請多注意。" },
+          { speaker: "passenger", jp: "ありがとうございました。連絡先を教えていただけますか？", kana: "ありがとうございました。れんらくさきをおしえていただけますか？", zh: "謝謝你，可以告訴我聯絡方式嗎？" },
+          { speaker: "driver", jp: "こちらが会社の番号でございます。何かあればご連絡ください。", kana: "こちらがかいしゃのばんごうでございます。なにかあればごれんらくください。", zh: "這是公司的電話號碼，有任何問題請聯絡。" },
+        ],
+      },
+      {
+        label: "情境二：身體不適",
+        items: [
+          { speaker: "passenger", jp: "すみません、気分が悪くなってきました。", kana: "すみません、きぶんがわるくなってきました。", zh: "不好意思，我開始覺得不舒服了。" },
+          { speaker: "driver", jp: "大丈夫ですか？すぐに止めましょうか？", kana: "だいじょうぶですか？すぐにとめましょうか？", zh: "你還好嗎？要馬上停車嗎？" },
+          { speaker: "passenger", jp: "はい、少し止めていただけますか？", kana: "はい、すこしとめていただけますか？", zh: "是的，可以停一下嗎？" },
+          { speaker: "driver", jp: "承知いたしました。今すぐ安全な場所に止めます。", kana: "しょうちいたしました。いますぐあんぜんなばしょにとめます。", zh: "了解，我馬上停在安全的地方。" },
+          { speaker: "passenger", jp: "ありがとうございます。少し窓を開けていただけますか？", kana: "ありがとうございます。すこしまどをあけていただけますか？", zh: "謝謝你，可以稍微開一下窗嗎？" },
+          { speaker: "driver", jp: "もちろんです。病院に行きますか？", kana: "もちろんです。びょういんにいきますか？", zh: "當然，要去醫院嗎？" },
+          { speaker: "passenger", jp: "少し休めば大丈夫だと思います。", kana: "すこしやすめばだいじょうぶだとおもいます。", zh: "我想稍微休息一下應該就好了。" },
+          { speaker: "driver", jp: "わかりました。ここで少しお休みください。急がなくて大丈夫ですよ。", kana: "わかりました。ここですこしおやすみください。いそがなくてだいじょうぶですよ。", zh: "了解，請在這裡稍微休息。不用急沒關係的。" },
+        ],
+      },
+      {
+        label: "情境三：道路問題・事故",
+        items: [
+          { speaker: "driver", jp: "申し訳ございません、前方で事故があり、大変渋滞しております。", kana: "もうしわけございません、ぜんぽうでじこがあり、たいへんじゅうたいしております。", zh: "非常抱歉，前方發生事故，嚴重塞車。" },
+          { speaker: "passenger", jp: "そうですか。だいたいあとどれくらいかかりますか？", kana: "そうですか。だいたいあとどれくらいかかりますか？", zh: "這樣啊，大概還需要多少時間？" },
+          { speaker: "driver", jp: "現時点では予測が難しい状況でございます。別のルートに変更いたしましょうか。", kana: "げんじてんではよそくがむずかしいじょうきょうでございます。べつのるーとにへんこういたしましょうか。", zh: "目前狀況很難預測，要改走其他路線嗎？" },
+          { speaker: "passenger", jp: "そうしていただけますか。電車に乗り換えた方がいいでしょうか。", kana: "そうしていただけますか。でんしゃにのりかえたほうがいいでしょうか。", zh: "可以的話就那樣吧。我是否應該改搭電車？" },
+          { speaker: "driver", jp: "最寄りの駅までお送りすることも可能でございます。", kana: "もよりのえきまでおおくりすることもかのうでございます。", zh: "送您到最近的車站也是可以的。" },
+          { speaker: "passenger", jp: "そうします。最寄りの駅はどこですか？", kana: "そうします。もよりのえきはどこですか？", zh: "就那樣吧，最近的車站在哪裡？" },
+          { speaker: "driver", jp: "〜駅でございます。そちらまでお送りいたします。", kana: "〜えきでございます。そちらまでおおくりいたします。", zh: "是〜車站，我送您過去。" },
+          { speaker: "passenger", jp: "ありがとうございます、助かりました。", kana: "ありがとうございます、たすかりました。", zh: "謝謝你，幫了大忙。" },
+        ],
+      },
+      {
+        label: "情境四：安全問題・速度超過",
+        items: [
+          { speaker: "passenger", jp: "すみません、少しスピードが速いように感じます。", kana: "すみません、すこしすぴーどがはやいようにかんじます。", zh: "不好意思，我感覺速度有點快。" },
+          { speaker: "driver", jp: "失礼いたしました。ゆっくり走ります。", kana: "しつれいいたしました。ゆっくりはしります。", zh: "失禮了，我慢一點開。" },
+          { speaker: "passenger", jp: "ありがとうございます。安全第一でお願いします。", kana: "ありがとうございます。あんぜんだいいちでおねがいします。", zh: "謝謝你，請以安全為優先。" },
+          { speaker: "driver", jp: "おっしゃる通りでございます。大変失礼いたしました。", kana: "おっしゃるとおりでございます。たいへんしつれいいたしました。", zh: "您說得對，真的非常失禮了。" },
+          { speaker: "passenger", jp: "急カーブの時は特にゆっくりお願いします。", kana: "きゅうかーぶのときはとくにゆっくりおねがいします。", zh: "急轉彎的時候請特別慢一點。" },
+          { speaker: "driver", jp: "かしこまりました、気をつけます。", kana: "かしこまりました、きをつけます。", zh: "好的，我會注意。" },
+          { speaker: "passenger", jp: "よろしくお願いします。", kana: "よろしくおねがいします。", zh: "麻煩你了。" },
+          { speaker: "driver", jp: "ご迷惑をおかけして、大変申し訳ございませんでした。", kana: "ごめいわくをおかけして、たいへんもうしわけございませんでした。", zh: "造成您的困擾，真的非常抱歉。" },
+        ],
+      },
+    ],
+  },
+};
+
+const PHRASE_KEYS = Object.keys(PHRASE_DATA);
+let currentPhraseScene = "hailing";
+let currentScenarioIndex = 0;
+
+// ============================================================
+// APP STATE & LOGIC
+// ============================================================
+const CAT_KEYS = Object.keys(VOCAB_DATA);
+let currentCat = "fare";
+let currentMode = "ref";
+let refSubMode = "lookup";
+let studySubMode = "memorize";
+
+let studyOrder = [];
+let studyIndex = 0;
+let isFlipped = false;
+
+let quizQueue = [];
+let quizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+let quizDirection = "jp2zh";
+let autoAdvanceTimer = null;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function refreshCatTabbarVisibility() {
+  const needsCat = (currentMode === 'ref' && refSubMode === 'lookup') ||
+                   (currentMode === 'study');
+  document.getElementById('catTabbar').style.display = needsCat ? 'flex' : 'none';
+}
+
+function refreshDirectionToggleVisibility() {
+  const showToggle = currentMode === 'study' && studySubMode === 'quiz';
+  document.getElementById('directionToggleBtn').style.display = showToggle ? 'inline-block' : 'none';
+}
+
+document.querySelectorAll('#modeTabbar .tab-item').forEach(tab => {
+  tab.addEventListener('click', () => {
+    stopPlayAll();
+    document.querySelectorAll('#modeTabbar .tab-item').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentMode = tab.dataset.mode;
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + currentMode).classList.add('active');
+    refreshCatTabbarVisibility();
+    refreshDirectionToggleVisibility();
+    enterCurrentMode();
+  });
+});
+
+document.getElementById('refInnerTabbar').addEventListener('click', (e) => {
+  const item = e.target.closest('.inner-tab-item');
+  if (!item) return;
+  document.querySelectorAll('#refInnerTabbar .inner-tab-item').forEach(t => t.classList.remove('active'));
+  item.classList.add('active');
+  refSubMode = item.dataset.submode;
+  document.querySelectorAll('#view-ref .inner-view').forEach(v => v.classList.remove('active'));
+  document.getElementById('ref-' + refSubMode).classList.add('active');
+  refreshCatTabbarVisibility();
+  enterCurrentMode();
+});
+
+document.getElementById('studyInnerTabbar').addEventListener('click', (e) => {
+  const item = e.target.closest('.inner-tab-item');
+  if (!item) return;
+  document.querySelectorAll('#studyInnerTabbar .inner-tab-item').forEach(t => t.classList.remove('active'));
+  item.classList.add('active');
+  studySubMode = item.dataset.submode;
+  document.querySelectorAll('#view-study .inner-view').forEach(v => v.classList.remove('active'));
+  document.getElementById('study-' + studySubMode).classList.add('active');
+  refreshCatTabbarVisibility();
+  refreshDirectionToggleVisibility();
+  enterCurrentMode();
+});
+
+function enterCurrentMode() {
+  if (currentMode === 'ref') {
+    if (refSubMode === 'lookup') renderRef();
+    if (refSubMode === 'confuse') renderConfuse();
+  } else if (currentMode === 'study') {
+    if (studySubMode === 'memorize') initStudy();
+    if (studySubMode === 'quiz') initQuiz();
+  } else if (currentMode === 'phrase') {
+    renderPhrase();
+  }
+}
+
+function buildCatTabs() {
+  const bar = document.getElementById('catTabbar');
+  bar.innerHTML = '';
+  CAT_KEYS.forEach(key => {
+    const cat = VOCAB_DATA[key];
+    const el = document.createElement('div');
+    el.className = 'subtab-item' + (key === currentCat ? ' active' : '');
+    el.textContent = cat.label;
+    el.addEventListener('click', () => {
+      currentCat = key;
+      buildCatTabs();
+      enterCurrentMode();
+    });
+    bar.appendChild(el);
+  });
+}
+
+/* ====== REF ====== */
+let refZhPinned = false;
+
+function renderRef() {
+  const items = VOCAB_DATA[currentCat].items;
+  const grid = document.getElementById('refGrid');
+  grid.classList.toggle('zh-pinned', refZhPinned);
+  grid.innerHTML = '';
+  items.forEach(item => {
+    const cell = document.createElement('div');
+    cell.className = 'ref-cell';
+    if (refZhPinned) {
+      cell.classList.add('revealed');
+      cell.innerHTML = `<span class="ref-cell-jp">${item.jp}</span><span class="ref-cell-kana">${item.kana}</span><span class="ref-cell-zh">${item.zh}</span>`;
+    } else {
+      cell.innerHTML = `<span class="ref-cell-jp">${item.jp}</span>`;
+    }
+    cell.addEventListener('click', () => {
+      if (refZhPinned) return;
+      const revealed = cell.classList.toggle('revealed');
+      cell.innerHTML = revealed
+        ? `<span class="ref-cell-kana">${item.kana}</span><span class="ref-cell-zh">${item.zh}</span>`
+        : `<span class="ref-cell-jp">${item.jp}</span>`;
+    });
+    grid.appendChild(cell);
+  });
+}
+
+document.getElementById('toggleRefZh').addEventListener('click', (e) => {
+  const isOn = e.target.dataset.on === 'true';
+  refZhPinned = !isOn;
+  e.target.dataset.on = String(refZhPinned);
+  document.getElementById('refLookupHint').textContent = refZhPinned
+    ? '已顯示全部假名與中文意思'
+    : '點擊單字查看假名與中文意思';
+  renderRef();
+});
+
+/* ====== STUDY ====== */
+function initStudy() {
+  const cat = VOCAB_DATA[currentCat];
+  studyOrder = cat.items.map((_, i) => i);
+  studyIndex = 0;
+  isFlipped = false;
+  renderStudyCard();
+}
+
+function renderStudyCard() {
+  const cat = VOCAB_DATA[currentCat];
+  const item = cat.items[studyOrder[studyIndex]];
+  isFlipped = false;
+  document.getElementById('cardJp').textContent = item.jp;
+  document.getElementById('cardKana').textContent = item.kana;
+  document.getElementById('cardZh').textContent = '';
+  document.getElementById('cardHint').textContent = '點擊卡片看中文';
+  const pos = studyIndex + 1;
+  const total = studyOrder.length;
+  document.getElementById('cardIndexTag').textContent = `${pos} / ${total}`;
+  document.getElementById('navCounter').textContent = `${pos} / ${total}`;
+}
+
+document.getElementById('flashcard').addEventListener('click', () => {
+  const cat = VOCAB_DATA[currentCat];
+  const item = cat.items[studyOrder[studyIndex]];
+  isFlipped = !isFlipped;
+  document.getElementById('cardZh').textContent = isFlipped ? item.zh : '';
+  document.getElementById('cardHint').textContent = isFlipped ? '點擊卡片隱藏中文' : '點擊卡片看中文';
+});
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  studyIndex = (studyIndex + 1) % studyOrder.length;
+  renderStudyCard();
+});
+document.getElementById('prevBtn').addEventListener('click', () => {
+  studyIndex = (studyIndex - 1 + studyOrder.length) % studyOrder.length;
+  renderStudyCard();
+});
+document.getElementById('shuffleBtn').addEventListener('click', () => {
+  studyOrder = shuffle(studyOrder);
+  studyIndex = 0;
+  renderStudyCard();
+});
+
+/* ====== QUIZ ====== */
+function initQuiz() {
+  const cat = VOCAB_DATA[currentCat];
+  quizQueue = shuffle(cat.items.map((_, i) => i));
+  quizIndex = 0;
+  quizScore = 0;
+  quizAnswered = false;
+  if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer); autoAdvanceTimer = null; }
+  document.getElementById('quizContent').style.display = 'block';
+  document.getElementById('quizResultView').style.display = 'none';
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  const cat = VOCAB_DATA[currentCat];
+  const itemIdx = quizQueue[quizIndex];
+  const item = cat.items[itemIdx];
+  quizAnswered = false;
+  if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer); autoAdvanceTimer = null; }
+
+  const label = document.getElementById('quizQuestionLabel');
+  const kanaEl = document.getElementById('quizKana');
+
+  if (quizDirection === 'jp2zh') {
+    label.textContent = '這個單字的中文意思是？';
+    document.getElementById('quizJp').textContent = item.jp;
+    kanaEl.textContent = item.kana;
+    kanaEl.style.display = '';
+  } else {
+    label.textContent = '這個中文對應的日文是？';
+    document.getElementById('quizJp').textContent = item.zh;
+    kanaEl.textContent = '';
+    kanaEl.style.display = 'none';
+  }
+
+  document.getElementById('quizFeedback').textContent = '';
+  document.getElementById('nextQuestionBtn').disabled = true;
+  document.getElementById('quizProgress').textContent = `第 ${quizIndex + 1} 題 / 共 ${quizQueue.length} 題`;
+
+  const correctAnswer = quizDirection === 'jp2zh' ? item.zh : item.jp;
+  const pool = cat.items.filter((_, i) => i !== itemIdx).map(x => quizDirection === 'jp2zh' ? x.zh : x.jp);
+  const wrongs = shuffle(pool).slice(0, 3);
+  const options = shuffle([correctAnswer, ...wrongs]);
+
+  const optWrap = document.getElementById('quizOptions');
+  optWrap.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => handleAnswer(btn, opt, correctAnswer));
+    optWrap.appendChild(btn);
+  });
+
+  document.getElementById('scoreText').textContent = `${quizScore} / ${quizIndex}`;
+}
+
+function handleAnswer(btn, chosen, correct) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    quizScore++;
+    document.getElementById('quizFeedback').textContent = '答對了';
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.quiz-option').forEach(b => { if (b.textContent === correct) b.classList.add('correct'); });
+    document.getElementById('quizFeedback').textContent = `正確答案：${correct}`;
+  }
+  document.getElementById('scoreText').textContent = `${quizScore} / ${quizIndex + 1}`;
+  document.getElementById('nextQuestionBtn').disabled = false;
+  if (chosen === correct) {
+    autoAdvanceTimer = setTimeout(() => { autoAdvanceTimer = null; goToNextQuestion(); }, 600);
+  }
+}
+
+function goToNextQuestion() {
+  quizIndex++;
+  if (quizIndex >= quizQueue.length) showQuizResult();
+  else renderQuizQuestion();
+}
+
+document.getElementById('nextQuestionBtn').addEventListener('click', () => {
+  if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer); autoAdvanceTimer = null; }
+  goToNextQuestion();
+});
+
+document.getElementById('directionToggleBtn').addEventListener('click', (e) => {
+  quizDirection = quizDirection === 'jp2zh' ? 'zh2jp' : 'jp2zh';
+  e.target.textContent = quizDirection === 'jp2zh' ? '切換為「中→日」' : '切換為「日→中」';
+  initQuiz();
+});
+
+function showQuizResult() {
+  document.getElementById('quizContent').style.display = 'none';
+  document.getElementById('quizResultView').style.display = 'block';
+  const total = quizQueue.length;
+  document.getElementById('finalScore').textContent = `${quizScore} / ${total}`;
+  const ratio = quizScore / total;
+  let msg = '繼續加油，多複習幾次吧';
+  if (ratio === 1) msg = '完美，這個分類已經記熟了';
+  else if (ratio >= 0.8) msg = '很不錯，幾乎全對';
+  else if (ratio >= 0.5) msg = '還可以，再複習一輪會更熟練';
+  document.getElementById('resultMsg').textContent = msg;
+}
+
+document.getElementById('restartBtn').addEventListener('click', initQuiz);
+
+/* ====== CONFUSE ====== */
+function renderConfuse() {
+  const wrap = document.getElementById('confuseList');
+  wrap.innerHTML = '';
+  CONFUSE_GROUPS.forEach(group => {
+    const row = document.createElement('div');
+    row.className = 'confuse-row';
+    const itemsHtml = group.items.map(it =>
+      `<div class="confuse-pill"><span class="k">${it.jp}（${it.kana}）</span><span class="z">${it.zh}</span></div>`
+    ).join('');
+    row.innerHTML = `<div class="confuse-title">${group.title}</div><div class="confuse-items">${itemsHtml}</div>`;
+    wrap.appendChild(row);
+  });
+}
+
+/* ====== PHRASE ====== */
+const SPEAKER_LABELS = { driver: "司機", passenger: "乘客" };
+
+function buildSceneTabs() {
+  const bar = document.getElementById('sceneTabbar');
+  bar.innerHTML = '';
+  PHRASE_KEYS.forEach(key => {
+    const scene = PHRASE_DATA[key];
+    const el = document.createElement('div');
+    el.className = 'scene-tab-item' + (key === currentPhraseScene ? ' active' : '');
+    el.textContent = scene.label;
+    el.addEventListener('click', () => {
+      stopPlayAll();
+      currentPhraseScene = key;
+      currentScenarioIndex = 0;
+      buildSceneTabs();
+      buildScenarioTabs();
+      renderPhraseList();
+    });
+    bar.appendChild(el);
+  });
+}
+
+function buildScenarioTabs() {
+  const scene = PHRASE_DATA[currentPhraseScene];
+  const bar = document.getElementById('scenarioTabbar');
+  bar.innerHTML = '';
+  scene.scenarios.forEach((scenario, i) => {
+    const el = document.createElement('div');
+    el.className = 'scenario-tab-item' + (i === currentScenarioIndex ? ' active' : '');
+    el.textContent = scenario.label;
+    el.addEventListener('click', () => {
+      stopPlayAll();
+      currentScenarioIndex = i;
+      buildScenarioTabs();
+      renderPhraseList();
+    });
+    bar.appendChild(el);
+  });
+}
+
+const SPEAKER_ICON_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18 6a8.5 8.5 0 0 1 0 12"></path></svg>`;
+
+function renderPhraseList() {
+  const scene = PHRASE_DATA[currentPhraseScene];
+  const scenario = scene.scenarios[currentScenarioIndex];
+  const list = document.getElementById('phraseList');
+  list.innerHTML = '';
+  scenario.items.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'phrase-row ' + item.speaker;
+    row.dataset.index = idx;
+    row.innerHTML = `
+      <span class="speaker-tag">${SPEAKER_LABELS[item.speaker]}</span>
+      <div class="phrase-bubble">
+        <div class="phrase-jp-row">
+          <span class="phrase-jp">${buildFuriganaHTML(item.jp)}</span>
+          <button class="speak-btn" type="button" aria-label="播放發音" title="播放發音">${SPEAKER_ICON_SVG}</button>
+        </div>
+        <div class="phrase-zh">${item.zh}</div>
+      </div>
+    `;
+    row.querySelectorAll('.furi').forEach(furiEl => {
+      let pressTimer = null;
+      furiEl.addEventListener('touchstart', () => { pressTimer = setTimeout(() => furiEl.classList.add('show-tooltip'), 350); });
+      furiEl.addEventListener('touchend', () => { clearTimeout(pressTimer); setTimeout(() => furiEl.classList.remove('show-tooltip'), 1200); });
+    });
+    const speakBtn = row.querySelector('.speak-btn');
+    speakBtn.addEventListener('click', () => {
+      stopPlayAll();
+      speakJapanese(item.jp, item.speaker, speakBtn, row);
+    });
+    list.appendChild(row);
+  });
+}
+
+/* ====== TTS ====== */
+let cachedJaVoices = null;
+function getJaVoices() {
+  if (cachedJaVoices && cachedJaVoices.length) return cachedJaVoices;
+  if (!('speechSynthesis' in window)) return [];
+  const all = window.speechSynthesis.getVoices();
+  cachedJaVoices = all.filter(v => v.lang && v.lang.toLowerCase().startsWith('ja'));
+  return cachedJaVoices;
+}
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => { cachedJaVoices = null; };
+}
+
+function configureUtteranceForSpeaker(utter, speaker) {
+  const voices = getJaVoices();
+  if (voices.length >= 2) {
+    const femaleHint = voices.find(v => /female|女|f\b/i.test(v.name));
+    const maleHint = voices.find(v => /male|男|m\b/i.test(v.name) && v !== femaleHint);
+    if (speaker === 'driver') {
+      utter.voice = maleHint || voices[0];
+    } else {
+      utter.voice = femaleHint || voices[1] || voices[0];
+    }
+  } else if (voices.length === 1) {
+    utter.voice = voices[0];
+  }
+  if (speaker === 'driver') { utter.pitch = 0.9; utter.rate = 0.95; }
+  else { utter.pitch = 1.1; utter.rate = 0.97; }
+}
+
+function speakJapanese(text, speaker, btn, row) {
+  if (!('speechSynthesis' in window)) { alert('您的瀏覽器不支援語音播放功能'); return; }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ja-JP';
+  configureUtteranceForSpeaker(utter, speaker);
+  document.querySelectorAll('.speak-btn.playing').forEach(b => b.classList.remove('playing'));
+  if (btn) btn.classList.add('playing');
+  if (row) row.classList.add('speaking');
+  utter.onend = () => { if (btn) btn.classList.remove('playing'); if (row) row.classList.remove('speaking'); };
+  utter.onerror = () => { if (btn) btn.classList.remove('playing'); if (row) row.classList.remove('speaking'); };
+  window.speechSynthesis.speak(utter);
+}
+
+/* ====== PLAY ALL ====== */
+let playAllActive = false;
+let playAllQueueIndex = 0;
+let playAllAbort = false;
+
+function setPlayAllButtonState(isPlaying) {
+  const btn = document.getElementById('playAllBtn');
+  const icon = document.getElementById('playAllIcon');
+  const label = document.getElementById('playAllLabel');
+  btn.classList.toggle('active', isPlaying);
+  label.textContent = isPlaying ? '停止播放' : '全部播放本情境';
+  icon.innerHTML = isPlaying
+    ? '<rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect>'
+    : '<polygon points="6 4 20 12 6 20 6 4"></polygon>';
+}
+
+function stopPlayAll() {
+  if (!playAllActive) return;
+  playAllAbort = true;
+  playAllActive = false;
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  document.querySelectorAll('.phrase-row.speaking').forEach(r => r.classList.remove('speaking'));
+  document.querySelectorAll('.speak-btn.playing').forEach(b => b.classList.remove('playing'));
+  setPlayAllButtonState(false);
+}
+
+function playAllScenario() {
+  const scene = PHRASE_DATA[currentPhraseScene];
+  const scenario = scene.scenarios[currentScenarioIndex];
+  const items = scenario.items;
+  const rows = Array.from(document.querySelectorAll('#phraseList .phrase-row'));
+
+  playAllActive = true;
+  playAllAbort = false;
+  playAllQueueIndex = 0;
+  setPlayAllButtonState(true);
+
+  function playNext() {
+    if (playAllAbort) return;
+    if (playAllQueueIndex >= items.length) {
+      playAllActive = false;
+      setPlayAllButtonState(false);
+      return;
+    }
+    const item = items[playAllQueueIndex];
+    const row = rows[playAllQueueIndex];
+    const speakBtn = row ? row.querySelector('.speak-btn') : null;
+    if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (!('speechSynthesis' in window)) { alert('您的瀏覽器不支援語音播放功能'); stopPlayAll(); return; }
+
+    const utter = new SpeechSynthesisUtterance(item.jp);
+    utter.lang = 'ja-JP';
+    configureUtteranceForSpeaker(utter, item.speaker);
+    document.querySelectorAll('.speak-btn.playing').forEach(b => b.classList.remove('playing'));
+    document.querySelectorAll('.phrase-row.speaking').forEach(r => r.classList.remove('speaking'));
+    if (speakBtn) speakBtn.classList.add('playing');
+    if (row) row.classList.add('speaking');
+    utter.onend = () => {
+      if (speakBtn) speakBtn.classList.remove('playing');
+      if (row) row.classList.remove('speaking');
+      playAllQueueIndex++;
+      if (!playAllAbort) setTimeout(playNext, 350);
+    };
+    utter.onerror = () => {
+      if (speakBtn) speakBtn.classList.remove('playing');
+      if (row) row.classList.remove('speaking');
+      playAllQueueIndex++;
+      if (!playAllAbort) setTimeout(playNext, 350);
+    };
+    window.speechSynthesis.speak(utter);
+  }
+  playNext();
+}
+
+document.getElementById('playAllBtn').addEventListener('click', () => {
+  if (playAllActive) stopPlayAll();
+  else playAllScenario();
+});
+
+function renderPhrase() {
+  buildSceneTabs();
+  buildScenarioTabs();
+  renderPhraseList();
+}
+
+document.getElementById('toggleZh').addEventListener('click', (e) => {
+  const isOn = e.target.dataset.on === 'true';
+  e.target.dataset.on = String(!isOn);
+  document.body.classList.toggle('show-zh', !isOn);
+});
+
+/* ====== THEME ====== */
+const SUN_PATH = `<circle cx="12" cy="12" r="4.5"></circle><line x1="12" y1="2.5" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="21.5"></line><line x1="4.2" y1="4.2" x2="6" y2="6"></line><line x1="18" y1="18" x2="19.8" y2="19.8"></line><line x1="2.5" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="21.5" y2="12"></line><line x1="4.2" y1="19.8" x2="6" y2="18"></line><line x1="18" y1="6" x2="19.8" y2="4.2"></line>`;
+const MOON_PATH = `<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path>`;
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeIcon').innerHTML = theme === 'dark' ? MOON_PATH : SUN_PATH;
+}
+
+const savedTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+applyTheme(savedTheme);
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+});
+
+/* ====== INIT ====== */
+buildCatTabs();
+renderRef();
+refreshDirectionToggleVisibility();
+</script>
+</body>
+</html>
